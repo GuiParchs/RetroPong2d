@@ -68,6 +68,24 @@ function love.update(dt)
 
     paddle1:update(dt)
     paddle2:update(dt)
+
+    if ball:collides(paddle1) then
+        ball.x = paddle1.x + Paddle.width
+        
+    elseif ball:collides(paddle2) then
+        ball.x = paddle2.x - Ball.size
+    end
+
+    local score = ball:update(dt)
+
+    if score then
+        gameState.score[score] = gameState.score[score] + 1
+
+        gameState.state = 'serve'
+        gameState.servingPlayer = score == 1 and 2 or 1
+
+        ball:reset()
+    end
 end
 
 function love.keypressed(key)
@@ -92,9 +110,12 @@ function love.keypressed(key)
 
     -- Serve
     elseif gameState.state == 'serve' then
+
         if gameState.servingPlayer == 1 and (key == 'return' or key == 'kpenter') or
            gameState.servingPlayer == 2 and key == 'space' then
+
             gameState.state = 'playing'
+            ball:serve(gameState.servingPlayer)
         end
     end
 end
