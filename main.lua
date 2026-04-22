@@ -146,8 +146,6 @@ function love.draw()
     love.graphics.printf('Welcome to Pong!', 0, 10, VIRTUAL_WIDTH, 'center')
     love.graphics.printf('Press Enter to start', 0, 20, VIRTUAL_WIDTH, 'center')
 
-    love.graphics.setFont(mediumFont)
-
     paddle1:render()
     paddle2:render()
 
