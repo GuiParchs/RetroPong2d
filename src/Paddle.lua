@@ -1,6 +1,6 @@
-Class = require 'lib.class'
+local Class = require 'lib.class'
 
-Paddle = Class{}
+local Paddle = Class{}
 
 Paddle.width = 5
 Paddle.height = 35

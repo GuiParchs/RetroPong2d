@@ -9,6 +9,11 @@ VIRTUAL_HEIGHT = 240
 WINDOW_WIDTH = 1024
 WINDOW_HEIGHT = 768
 
+local BG_COLOR = {40/255, 45/255, 52/255, 1}
+
+local smallFont, mediumFont, largeFont
+local paddle1, paddle2
+local ball
 
 
 function love.load()
@@ -76,7 +81,7 @@ end
 function love.draw()
     push:start()
 
-    love.graphics.clear(40/255, 45/255, 52/255, 1)
+    love.graphics.clear(BG_COLOR[1], BG_COLOR[2], BG_COLOR[3], BG_COLOR[4])
 
     love.graphics.setFont(smallFont)
     love.graphics.printf('Welcome to pong!', 0, 10, VIRTUAL_WIDTH, 'center')

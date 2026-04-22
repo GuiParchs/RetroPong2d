@@ -1,6 +1,6 @@
-Class = require 'lib.class'
+local Class = require 'lib.class'
 
-Ball = Class{}
+local Ball = Class{}
 
 Ball.size = 4
 
