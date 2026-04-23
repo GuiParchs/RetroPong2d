@@ -43,11 +43,8 @@ function ui.drawServeText(playerServing)
     love.graphics.printf('Press ' .. key .. ' to serve', 0, 20, VIRTUAL_WIDTH, 'center')
 end
 
-function ui.drawGameInfo(gameState)
-    local score1 = gameState.score[1]
-    local score2 = gameState.score[2]
-
-    if (score1 == 3 and score2 < 3) or (score2 == 3 and score1 < 3) or (score1 == 4 or score2 == 4) then
+function ui.drawGameInfo(score1, score2)
+    if (score1 >= 3 or score2 >= 3) and score1 ~= score2 then
         love.graphics.setFont(smallFont)
         love.graphics.printf('GAME POINT', 0, VIRTUAL_HEIGHT / 5 + 20, VIRTUAL_WIDTH, 'center')
     end
@@ -90,13 +87,7 @@ function ui.drawCenterNet(segmentHeight, gap)
 end
 
 function ui.drawGameOverText(score1, score2)
-    local winner
-
-    if score1 > score2 then
-        winner = getPlayerDisplayName(1)
-    else
-        winner = getPlayerDisplayName(2)
-    end
+    local winner = score1 > score2 and getPlayerDisplayName(1) or getPlayerDisplayName(2)
 
     love.graphics.setFont(smallFont)
     love.graphics.printf(winner .. ' wins!', 0, 10, VIRTUAL_WIDTH, 'center')

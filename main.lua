@@ -13,7 +13,7 @@ VIRTUAL_HEIGHT = 240
 WINDOW_WIDTH = 1024
 WINDOW_HEIGHT = 768
 
-local BG_COLOR = {40/255, 45/255, 52/255, 1}
+local BG_COLOR = {40/255, 45/255, 52/255}
 
 
 local paddle1, paddle2
@@ -27,9 +27,7 @@ function love.load()
     love.window.setTitle('PONG')
     
     love.graphics.setDefaultFilter('nearest', 'nearest')
-
-    math.randomseed(os.time())
-
+    
     push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
         fullscreen = false,
         resizable = true,
@@ -45,6 +43,8 @@ function love.load()
     
     local BALL_OFFSET = Ball.size / 2
     ball = Ball(VIRTUAL_WIDTH / 2 - BALL_OFFSET, VIRTUAL_HEIGHT / 2 - BALL_OFFSET)
+
+    math.randomseed(os.time())
     
     ui.loadFonts()
     sounds.load()
@@ -157,7 +157,7 @@ end
 function love.draw()
     push:start()
 
-    love.graphics.clear(BG_COLOR[1], BG_COLOR[2], BG_COLOR[3], BG_COLOR[4])
+    love.graphics.clear(BG_COLOR[1], BG_COLOR[2], BG_COLOR[3])
 
     if gameState.state == 'start' then
         ui.drawStartText()
@@ -168,7 +168,7 @@ function love.draw()
 
     if gameState.state == 'serve' then
         ui.drawServeText(gameState.servingPlayer)
-        ui.drawGameInfo(gameState)
+        ui.drawGameInfo(gameState.score[1], gameState.score[2])
 
     elseif gameState.state == 'gameover' then
         ui.drawGameOverText(gameState.score[1], gameState.score[2])
