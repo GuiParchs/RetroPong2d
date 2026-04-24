@@ -11,17 +11,17 @@ GAME_WIDTH = 320
 GAME_HEIGHT = 240
 
 Debug = false
-UseShaders = false
 
 local BG_COLOR = {40/255, 45/255, 52/255}
 
 local scale, offsetX, offsetY
 local scaledW, scaledH
-local gameCanvas, shaderEffect
+local gameCanvas
 
 local paddle1, paddle2
 local ball
 
+local useShaders = true
 local showFps = false
 local isQuitting = false
 local quitTimer = nil
@@ -44,14 +44,24 @@ local function updateResolution(winW, winH)
     offsetY = math.floor((winH - scaledH) / 2)
     
     -- Resize moonshine effect
-    if shaderEffect and UseShaders then
-        shaderEffect.resize(winW, winH)
+    if useShaders then
+        shader.resize(winW, winH)
     end
 end
 
 local function switchFullscreen()
     love.window.setFullscreen(not love.window.getFullscreen(), 'desktop')
     updateResolution(love.graphics.getDimensions())
+end
+
+local function switchShaders()
+    if not shader.effect then
+        shader.effect = shader.load()
+    end
+
+    useShaders = not useShaders
+
+    shader.resize(love.graphics.getDimensions())
 end
 
 function love.load()
@@ -81,12 +91,13 @@ function love.load()
     sounds.load()
 
     -- CRT shader effect
-    if UseShaders then
-        shaderEffect = shader.load()
+    if useShaders then
+        shader.effect = shader.load()
     end
 
     -- Update resolution
-    updateResolution(love.graphics.getDimensions())
+    switchFullscreen()
+    --updateResolution(love.graphics.getDimensions())
 end
 
 local function handlePaddleInput(paddle, upKeys, downKeys)
@@ -193,6 +204,9 @@ function love.keypressed(key)
     elseif key == 'f2' then
         Debug = not Debug
         sounds.select:play()
+    elseif key == 'f3' then
+        switchShaders()
+        sounds.select:play()
     end
 
     -- GameState logic
@@ -296,23 +310,13 @@ function love.draw()
     love.graphics.setCanvas() -- start drawing to screen
 
     -- Apply shader
-    if UseShaders then
-        shaderEffect(function()
+    if useShaders then
+        shader.get()(function()
             drawGameCanvas()
         end)
     else
         drawGameCanvas()
     end
-    
-
-    -- DEBUG
-    -- love.graphics.setColor(1, 0, 0)
-    -- love.graphics.print("Scale: " .. scale, 10, 10)
-    -- love.graphics.print("Offset X: " .. offsetX, 10, 25)
-    -- love.graphics.print("Window W: " .. love.graphics.getWidth(), 10, 40)
-    -- love.graphics.print("Offset Y: " .. offsetY, 10, 65)
-    -- love.graphics.print("Window H: " .. love.graphics.getHeight(), 10, 80)
-    -- love.graphics.setColor(1, 1, 1)
 end
 
 function love.resize(winW, winH)

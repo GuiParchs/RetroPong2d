@@ -3,24 +3,33 @@ local moonshine = require 'moonshine'
 local shader = {}
 
 local effects = moonshine.effects
+local effect = nil
 
 function shader.load()
 
-    local effect = moonshine(effects.crt)
+    effect = moonshine(effects.filmgrain)
         .chain(effects.chromasep)
         .chain(effects.glow)
-        .chain(effects.filmgrain)
         .chain(effects.vignette)
         .chain(moonshine.effects.scanlines)
+        .chain(effects.crt)
 
     effect.parameters = {
-            glow = {strength = 1},
-            filmgrain = {opacity = 0.8, size = 0.8},
-            vignette = {radius = 0.85, opacity = 0.18},
+            filmgrain = {opacity = 0.8, size = 0.75},
             chromasep = {radius = 2.5},
-            scanlines = {frequency = GAME_HEIGHT}
+            glow = {strength = 1},
+            vignette = {radius = 0.85, opacity = 0.18},
+            scanlines = {frequency = GAME_HEIGHT, opacity = 0.5}
         }
-    
+end
+
+function shader.resize(w, h)
+    if not effect then return end
+
+    effect.resize(w, h)
+end
+
+function shader.get()
     return effect
 end
 

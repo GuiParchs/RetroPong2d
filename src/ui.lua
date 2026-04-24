@@ -140,7 +140,7 @@ end
 function ui.drawFPS()
     love.graphics.setFont(smallFont)
     setColor('green')
-    love.graphics.print(tostring(love.timer.getFPS()) .. 'FPS', 10, 10)
+    love.graphics.print(tostring(love.timer.getFPS()), 10, 10)
     setColor()
 end
 
