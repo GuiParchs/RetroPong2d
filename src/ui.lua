@@ -83,7 +83,7 @@ function ui.drawServeText(playerServing, gameMode)
     if gameMode == 'pvp' or playerServing == 1 then
         love.graphics.printf('Press ' .. key .. ' to serve', 0, 20, VIRTUAL_WIDTH, 'center')
     else
-        love.graphics.printf('Waiting for ' .. getPlayerDisplayName(playerServing) .. ' to serve!', 0, 20, VIRTUAL_WIDTH, 'center')
+        love.graphics.printf('Waiting for ' .. getPlayerDisplayName(playerServing) .. ' to serve', 0, 20, VIRTUAL_WIDTH, 'center')
     end
 end
 

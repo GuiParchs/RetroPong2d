@@ -3,24 +3,35 @@ local gameState = require 'src.GameState'
 local cpu = {}
 
 local MIN_SERVE_DELAY = 0.75
-local MAX_SERVE_DELAY = 4
+local MAX_SERVE_DELAY = 3.75
+local SERVE_DELAY_SHITF = 0.8 -- decreases serve delay the more points P1 has
 
-local MIN_REACTION_TIME = 0.05
-local MAX_REACTION_TIME = 0.2
+local MIN_REACTION_TIME = 0.01
+local MAX_REACTION_TIME = 0.17
 
-local MAX_TARGET_OFFSET = 10
-local MOVE_MARGIN = 10
+local MAX_TARGET_OFFSET = 8
+local MOVE_MARGIN = 16
+local LEAD_TIME = 0.085 -- foresees the y position
 
 local ball
 local paddle
 
 local currentTask
 local lastGameState
-local timer = 0
+local moveTimer = 0
+local taskTimer = 0
 
 local targetY
 
-local function getRandomNumber(min, max)
+local function getRandomNumber(min, max, serveRelated)
+    if serveRelated then
+        local shift = gameState.score[1] * SERVE_DELAY_SHITF
+        max = max - shift
+        min = min - shift / 5
+    end
+
+    if max < min then min = max end
+
     return math.random() * (max - min) + min
 end
 
@@ -33,17 +44,20 @@ function cpu.handleGame(dt)
     -- Ignore states
     if gameState.state == 'start' or gameState.state == 'gameover' then
         currentTask = nil
+        paddle:move(1)
         return
     end
 
     -- Reset task if game state changes
     if lastGameState ~= gameState.state then
         lastGameState = gameState.state
+        paddle:move(0)
         currentTask = nil
     end
 
-    -- Update timer
-    timer = timer - dt
+    -- Update timers
+    taskTimer = taskTimer - dt
+    moveTimer = moveTimer - dt
 
     -- Serve state
     if gameState.state == 'serve' then
@@ -52,13 +66,13 @@ function cpu.handleGame(dt)
             -- Start serve countdown
             if gameState.servingPlayer == 2 then
                 currentTask = 'serve'
-                timer = getRandomNumber(MIN_SERVE_DELAY, MAX_SERVE_DELAY)
+                taskTimer = getRandomNumber(MIN_SERVE_DELAY, MAX_SERVE_DELAY)
             else
                 currentTask = 'waiting_serve' -- or wait for player to serve
             end
         
         -- Serve when timer is up
-        elseif currentTask == 'serve' and timer <= 0 then
+        elseif currentTask == 'serve' and taskTimer <= 0 then
             ball:serve(2)
             gameState.state = 'playing'
             currentTask = nil -- reset task
@@ -68,17 +82,21 @@ function cpu.handleGame(dt)
     elseif gameState.state == 'playing' then
         if currentTask ~= 'updating' then
             currentTask = 'updating'
-            timer = MIN_REACTION_TIME
+            taskTimer = MIN_REACTION_TIME
         end
 
-        if timer <= 0 then
-            targetY = ball.y + ball.size / 2 + getRandomNumber(-MAX_TARGET_OFFSET, MAX_TARGET_OFFSET)
-            timer = getRandomNumber(MIN_REACTION_TIME, MAX_REACTION_TIME)
+        if taskTimer <= 0 then
+            targetY = ball.y + (ball.dy * LEAD_TIME) + ball.size / 2 + getRandomNumber(-MAX_TARGET_OFFSET, MAX_TARGET_OFFSET)
+            taskTimer = getRandomNumber(MIN_REACTION_TIME, MAX_REACTION_TIME)
         end
 
         -- Move paddle
         if targetY then
+            if moveTimer > 0 then return end
+
             cpu.move()
+
+            moveTimer = getRandomNumber(MIN_REACTION_TIME, MAX_REACTION_TIME)
         end
     end
 end

@@ -8,9 +8,9 @@ local MAX_SERVE_DX = 150
 
 local BASE_SPEEDUP = 0.01
 
-local BONUS_SPEEDUP = 0.3
-local BONUS_DECAY = 0.18
-local MAX_BONUS = 2
+local BONUS_SPEEDUP = 0.45
+local BONUS_DECAY = 0.17
+local MAX_BONUS = 3
 
 local MAX_DX = 325
 local MAX_SPEED = 400
