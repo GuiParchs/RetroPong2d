@@ -1,23 +1,22 @@
-local push = require 'lib.push'
-
 local Ball = require 'src.Ball'
 local Paddle = require 'src.Paddle'
 
 local cpu = require 'src.cpu'
-local gameState = require 'src.GameState'
+local gameState = require 'src.gameState'
+local shader = require 'src.shader'
 local sounds = require 'src.sounds'
 local ui = require 'src.ui'
 
-VIRTUAL_WIDTH = 320
-VIRTUAL_HEIGHT = 240
-
-WINDOW_WIDTH = 1024
-WINDOW_HEIGHT = 768
-
-local BG_COLOR = {40/255, 45/255, 52/255}
+GAME_WIDTH = 320
+GAME_HEIGHT = 240
 
 Debug = false
 
+local BG_COLOR = {40/255, 45/255, 52/255}
+
+local scale, offsetX, offsetY
+local scaledW, scaledH
+local gameCanvas, shaderEffect
 
 local paddle1, paddle2
 local ball
@@ -26,31 +25,63 @@ local showFps = false
 local isQuitting = false
 local quitTimer = nil
 
+local function updateResolution(winW, winH)
+    winW, winH = math.max(winW, 1), math.max(winH, 1)
+    
+    -- Maximum scale that fits window
+    scale = math.min(winW / GAME_WIDTH, winH / GAME_HEIGHT)
+    
+    -- Pixel perfect
+    scale = math.max(1, math.floor(scale)) 
+    
+    -- Scaled resolution
+    scaledW = GAME_WIDTH * scale
+    scaledH = GAME_HEIGHT * scale
+    
+    -- 4:3 margin
+    offsetX = math.floor((winW - scaledW) / 2)
+    offsetY = math.floor((winH - scaledH) / 2)
+    
+    -- Resize moonshine effect
+    shaderEffect.resize(winW, winH)
+end
+
+local function switchFullscreen()
+    love.window.setFullscreen(not love.window.getFullscreen(), 'desktop')
+    updateResolution(love.graphics.getDimensions())
+end
+
 function love.load()
+    -- set window title
     love.window.setTitle('PONG')
-    
-    love.graphics.setDefaultFilter('nearest', 'nearest')
-    
-    push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
-        fullscreen = false,
-        resizable = true,
-        vsync = true,
-        pixelperfect = true
-    })
 
-    local W_OFFSET = 8
-    local H_OFFSET = 10
-    
-    paddle1 = Paddle(W_OFFSET, H_OFFSET)
-    paddle2 = Paddle(VIRTUAL_WIDTH - W_OFFSET - Paddle.width, VIRTUAL_HEIGHT - H_OFFSET - Paddle.height)
-    
-    local BALL_OFFSET = Ball.size / 2
-    ball = Ball(VIRTUAL_WIDTH / 2 - BALL_OFFSET, VIRTUAL_HEIGHT / 2 - BALL_OFFSET)
+    -- Gamve canvas (low-res)
+    gameCanvas = love.graphics.newCanvas(GAME_WIDTH, GAME_HEIGHT)
+    gameCanvas:setFilter("nearest", "nearest") -- no filtering
 
+    -- Create paddles
+    local paddleW = 8
+    local paddleH = 10
+    
+    paddle1 = Paddle(paddleW, paddleH)
+    paddle2 = Paddle(GAME_WIDTH - paddleW - Paddle.width, GAME_HEIGHT - paddleH - Paddle.height)
+    
+    -- Create ball
+    ball = Ball()
+    ball:reset()
+
+    -- Set randomseed
     math.randomseed(os.time())
     
+    -- Load resources
     ui.loadFonts()
     sounds.load()
+
+    -- CRT shader effect
+    shaderEffect = shader.load()
+
+    -- Update resolution
+    updateResolution(love.graphics.getDimensions())
 end
 
 local function handlePaddleInput(paddle, upKeys, downKeys)
@@ -149,7 +180,7 @@ function love.keypressed(key)
         quitTimer = 0.25
         sounds.goal:play()
     elseif key == 'f' or key == 'f11' then
-        push:switchFullscreen()
+        switchFullscreen()
         sounds.select:play()
     elseif key == 'f1' then
         showFps = not showFps
@@ -204,9 +235,7 @@ function love.keypressed(key)
     end
 end
 
-function love.draw()
-    push:start()
-
+local function drawGameFrame()
     love.graphics.clear(BG_COLOR[1], BG_COLOR[2], BG_COLOR[3])
 
     if gameState.state == 'start' then
@@ -238,10 +267,40 @@ function love.draw()
     if Debug then
         ui.drawDebug(ball)
     end
-
-    push:finish()
 end
 
-function love.resize(w, h)
-    push:resize(w, h)
+function love.draw()
+    -- set low-res canvas
+    love.graphics.setCanvas(gameCanvas)
+    love.graphics.clear()
+    
+    -- draw game
+    drawGameFrame()
+    
+    love.graphics.setCanvas() -- start drawing to screen
+
+    -- Apply shader
+    shaderEffect(function()
+        love.graphics.draw(
+            gameCanvas,
+            offsetX, -- horizontal margin
+            offsetY, -- vertical margin
+            0,
+            scale,
+            scale
+        )
+    end)
+
+    -- DEBUG
+    -- love.graphics.setColor(1, 0, 0)
+    -- love.graphics.print("Scale: " .. scale, 10, 10)
+    -- love.graphics.print("Offset X: " .. offsetX, 10, 25)
+    -- love.graphics.print("Window W: " .. love.graphics.getWidth(), 10, 40)
+    -- love.graphics.print("Offset Y: " .. offsetY, 10, 65)
+    -- love.graphics.print("Window H: " .. love.graphics.getHeight(), 10, 80)
+    -- love.graphics.setColor(1, 1, 1)
+end
+
+function love.resize(winW, winH)
+    updateResolution(winW, winH)
 end

@@ -19,9 +19,9 @@ local Ball = Class{}
 
 Ball.size = 4
 
-function Ball:init(x, y)
-    self.x = x
-    self.y = y
+function Ball:init()
+    self.x = 0
+    self.y = 0
 
     self.dx = 0
     self.dy = 0
@@ -62,8 +62,8 @@ function Ball:update(dt)
         self:_hitWall()
 
     -- Collision with bottom
-    elseif self.y >= VIRTUAL_HEIGHT - Ball.size then
-        self.y = VIRTUAL_HEIGHT - Ball.size
+    elseif self.y >= GAME_HEIGHT - Ball.size then
+        self.y = GAME_HEIGHT - Ball.size
         self:_hitWall()
     end
 
@@ -72,7 +72,7 @@ function Ball:update(dt)
         self:_hitGoal()
         return 2
 
-    elseif self.x >= VIRTUAL_WIDTH then
+    elseif self.x >= GAME_WIDTH then
         self:_hitGoal()
         return 1
     end
@@ -101,8 +101,10 @@ function Ball:collides(paddle)
 end
 
 function Ball:reset()
-    self.x = VIRTUAL_WIDTH / 2 - Ball.size / 2
-    self.y = VIRTUAL_HEIGHT / 2 - Ball.size / 2
+    local ball_offset = Ball.size / 2
+
+    self.x = GAME_WIDTH / 2 - ball_offset
+    self.y = GAME_HEIGHT / 2 - ball_offset
     self.dx = 0
     self.dy = 0
     self.bonusFactor = 0

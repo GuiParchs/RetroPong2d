@@ -1,4 +1,4 @@
-local gameState = require 'src.GameState'
+local gameState = require 'src.gameState'
 
 local cpu = {}
 
@@ -88,7 +88,7 @@ function cpu.handleGame(dt)
         -- TAUNT
         if currentTask == 'waiting_serve' or currentTask == 'serve' then
             local oscillation = math.sin(love.timer.getTime() * TAUNT_SPEED) * TAUNT_RANGE
-            targetY = VIRTUAL_HEIGHT / 2 + oscillation + getRandomNumber(-MAX_TARGET_OFFSET, MAX_TARGET_OFFSET, true)
+            targetY = GAME_HEIGHT / 2 + oscillation + getRandomNumber(-MAX_TARGET_OFFSET, MAX_TARGET_OFFSET, true)
         end
 
     -- Playing state

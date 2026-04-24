@@ -20,8 +20,8 @@ function Paddle:update(dt)
     if self.y <= 0 then
         self.y = 0
         self.dy = math.max(0, self.dy)
-    elseif self.y >= VIRTUAL_HEIGHT - Paddle.height then
-        self.y = VIRTUAL_HEIGHT - Paddle.height
+    elseif self.y >= GAME_HEIGHT - Paddle.height then
+        self.y = GAME_HEIGHT - Paddle.height
         self.dy = math.min(0, self.dy)
     end
 end
