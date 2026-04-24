@@ -11,6 +11,7 @@ GAME_WIDTH = 320
 GAME_HEIGHT = 240
 
 Debug = false
+UseShaders = false
 
 local BG_COLOR = {40/255, 45/255, 52/255}
 
@@ -43,7 +44,9 @@ local function updateResolution(winW, winH)
     offsetY = math.floor((winH - scaledH) / 2)
     
     -- Resize moonshine effect
-    shaderEffect.resize(winW, winH)
+    if shaderEffect and UseShaders then
+        shaderEffect.resize(winW, winH)
+    end
 end
 
 local function switchFullscreen()
@@ -78,7 +81,9 @@ function love.load()
     sounds.load()
 
     -- CRT shader effect
-    shaderEffect = shader.load()
+    if UseShaders then
+        shaderEffect = shader.load()
+    end
 
     -- Update resolution
     updateResolution(love.graphics.getDimensions())
@@ -269,6 +274,17 @@ local function drawGameFrame()
     end
 end
 
+local function drawGameCanvas()
+    love.graphics.draw(
+        gameCanvas,
+        offsetX, -- horizontal margin
+        offsetY, -- vertical margin
+        0,
+        scale,
+        scale
+    )
+end
+
 function love.draw()
     -- set low-res canvas
     love.graphics.setCanvas(gameCanvas)
@@ -280,16 +296,14 @@ function love.draw()
     love.graphics.setCanvas() -- start drawing to screen
 
     -- Apply shader
-    shaderEffect(function()
-        love.graphics.draw(
-            gameCanvas,
-            offsetX, -- horizontal margin
-            offsetY, -- vertical margin
-            0,
-            scale,
-            scale
-        )
-    end)
+    if UseShaders then
+        shaderEffect(function()
+            drawGameCanvas()
+        end)
+    else
+        drawGameCanvas()
+    end
+    
 
     -- DEBUG
     -- love.graphics.setColor(1, 0, 0)

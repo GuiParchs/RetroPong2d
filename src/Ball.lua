@@ -4,13 +4,13 @@ local sounds = require 'src.sounds'
 
 local MAX_SERVE_DY = 80
 local MIN_SERVE_DX = 100
-local MAX_SERVE_DX = 150
+local MAX_SERVE_DX = 130
 
 local BASE_SPEEDUP = 0.01
 
-local BONUS_SPEEDUP = 0.45
-local BONUS_DECAY = 0.17
-local MAX_BONUS = 3
+local BONUS_SPEEDUP = 0.6
+local BONUS_DECAY = 0.3
+local MAX_BONUS = 3.5
 
 local MAX_DX = 325
 local MAX_SPEED = 400
@@ -126,14 +126,14 @@ function Ball:_hitPaddle(paddle)
     local impactPoint = 1 - math.min(1, math.abs(intersect)) -- distance from center (0 - 1)
 
     -- Apply bonus
-    self.bonusFactor = (self.bonusFactor * impactPoint) + impactPoint -- sweet spot factor
+    self.bonusFactor = (self.bonusFactor / 1.25) + impactPoint -- sweet spot factor
     self.bonusFactor = math.min(self.bonusFactor, MAX_BONUS)
 
     -- Speed up ball
     self:_speedUp()
 
     -- Change angle
-    intersect = math.max(-1.2, math.min(1.2, intersect))
+    intersect = math.max(-1.5, math.min(1.5, intersect))
     self.dy = intersect * 140
 
     -- Play audio
@@ -143,7 +143,7 @@ end
 
 function Ball:_hitWall()
     self.dy = -self.dy
-    self.bonusFactor = self.bonusFactor / 3
+    self.bonusFactor = self.bonusFactor / 1.25
     self:_speedUp()
 
     sounds.wallHit:stop()

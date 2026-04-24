@@ -2,8 +2,8 @@ local gameState = require 'src.gameState'
 
 local cpu = {}
 
-local MIN_SERVE_DELAY = 0.75
-local MAX_SERVE_DELAY = 3.75
+local MIN_SERVE_DELAY = 0.9
+local MAX_SERVE_DELAY = 4.5
 local SERVE_DELAY_SHITF = 0.8 -- decreases serve delay the more points P1 has
 
 local TAUNT_SPEED = 20
@@ -12,7 +12,7 @@ local TAUNT_RANGE = 15
 local MIN_REACTION_TIME = 0.01
 local MAX_REACTION_TIME = 0.17
 
-local MAX_TARGET_OFFSET = 8
+local MAX_TARGET_OFFSET = 6
 local MOVE_MARGIN = 16
 local LEAD_TIME = 0.085 -- foresees the y position
 
@@ -42,25 +42,34 @@ local function getRandomNumber(min, max, serveRelated)
     return math.random() * (max - min) + min
 end
 
+local function taunt(speedIncrease)
+    local oscillation = math.sin(love.timer.getTime() * TAUNT_SPEED * (1 + speedIncrease)) * TAUNT_RANGE
+    targetY = GAME_HEIGHT / 2 + oscillation + getRandomNumber(-MAX_TARGET_OFFSET, MAX_TARGET_OFFSET)
+end
+
 function cpu.setVariables(ballRef, paddleRef)
     ball = ballRef
     paddle = paddleRef
 end
 
+function cpu.reset()
+    currentTask = nil
+    paddle:move(0)
+    targetY = nil
+end
+
 function cpu.handleGame(dt)
-    -- Ignore states
-    if gameState.state == 'start' or gameState.state == 'gameover' then
-        currentTask = nil
-        paddle:move(1)
+    -- Ignore start state
+    if gameState.state == 'start' then
+        cpu.reset()
+        lastGameState = nil
         return
     end
 
     -- Reset task if game state changes
     if lastGameState ~= gameState.state then
         lastGameState = gameState.state
-        paddle:move(0)
-        currentTask = nil
-        targetY = nil
+        cpu.reset()
     end
 
     -- Update timers
@@ -87,8 +96,7 @@ function cpu.handleGame(dt)
 
         -- TAUNT
         if currentTask == 'waiting_serve' or currentTask == 'serve' then
-            local oscillation = math.sin(love.timer.getTime() * TAUNT_SPEED) * TAUNT_RANGE
-            targetY = GAME_HEIGHT / 2 + oscillation + getRandomNumber(-MAX_TARGET_OFFSET, MAX_TARGET_OFFSET, true)
+            taunt(gameState.score[1] / 5)
         end
 
     -- Playing state
@@ -101,6 +109,14 @@ function cpu.handleGame(dt)
         if taskTimer <= 0 then
             targetY = ball.y + (ball.dy * LEAD_TIME) + ball.size / 2 + getRandomNumber(-MAX_TARGET_OFFSET, MAX_TARGET_OFFSET)
             taskTimer = getRandomNumber(MIN_REACTION_TIME, MAX_REACTION_TIME)
+        end
+    
+    -- Game over state
+    elseif gameState.state == 'gameover' then
+        if gameState.score[2] == 5 then
+            taunt(5)
+        else
+            paddle:move(1)
         end
     end
 
