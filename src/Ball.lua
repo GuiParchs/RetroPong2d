@@ -38,7 +38,7 @@ function Ball:serve(player)
         self.dx = -self.dx
     end
     
-    sounds.serve:play()
+    sounds.play('serve')
 end
 
 -- Returns 1 if player 1 scores, 2 if player 2 scores, nil otherwise
@@ -137,8 +137,7 @@ function Ball:_hitPaddle(paddle)
     self.dy = intersect * 140
 
     -- Play audio
-    sounds.paddleHit:stop()
-    sounds.paddleHit:play()
+    sounds.play('paddleHit')
 end
 
 function Ball:_hitWall()
@@ -146,8 +145,7 @@ function Ball:_hitWall()
     self.bonusFactor = self.bonusFactor / 1.25
     self:_speedUp()
 
-    sounds.wallHit:stop()
-    sounds.wallHit:play()
+    sounds.play('wallHit')
 end
 
 function Ball:_speedUp()
@@ -163,8 +161,7 @@ end
 function Ball:_hitGoal()
     self:reset()
 
-    sounds.goal:stop()
-    sounds.goal:play()
+    sounds.play('goal')
 end
 
 return Ball

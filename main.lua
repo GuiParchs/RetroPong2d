@@ -11,6 +11,8 @@ GAME_WIDTH = 320
 GAME_HEIGHT = 240
 
 Debug = false
+EnableCRT = true
+
 
 local BG_COLOR = {40/255, 45/255, 52/255}
 
@@ -21,7 +23,6 @@ local gameCanvas
 local paddle1, paddle2
 local ball
 
-local useShaders = true
 local showFps = false
 local isQuitting = false
 local quitTimer = nil
@@ -44,7 +45,7 @@ local function updateResolution(winW, winH)
     offsetY = math.floor((winH - scaledH) / 2)
     
     -- Resize moonshine effect
-    if useShaders then
+    if EnableCRT then
         shader.resize(winW, winH)
     end
 end
@@ -59,9 +60,10 @@ local function switchShaders()
         shader.load()
     end
 
-    useShaders = not useShaders
+    EnableCRT = not EnableCRT
 
     shader.resize(love.graphics.getDimensions())
+    sounds.setFilter(EnableCRT)
 end
 
 function love.load()
@@ -91,8 +93,9 @@ function love.load()
     sounds.load()
 
     -- CRT shader effect
-    if useShaders then
+    if EnableCRT then
         shader.load()
+        sounds.setFilter(true)
     end
 
     -- Update resolution
@@ -194,19 +197,19 @@ function love.keypressed(key)
     if key == 'escape' then
         isQuitting = true
         quitTimer = 0.25
-        sounds.goal:play()
+        sounds.play('select')
     elseif key == 'f' or key == 'f11' then
         switchFullscreen()
-        sounds.select:play()
+        sounds.play('select')
     elseif key == 'f1' then
         showFps = not showFps
-        sounds.select:play()
+        sounds.play('select')
     elseif key == 'f2' then
         Debug = not Debug
-        sounds.select:play()
+        sounds.play('select')
     elseif key == 'f3' then
         switchShaders()
-        sounds.select:play()
+        sounds.play('select')
     end
 
     -- GameState logic
@@ -214,7 +217,7 @@ function love.keypressed(key)
     if gameState.state == 'start' then
         if key == 'w' or key == 'up' or key == 's' or key == 'down' then
             gameState.mode = gameState.mode == 'pvp' and 'mvm' or 'pvp'
-            sounds.select:play()
+            sounds.play('select')
 
         elseif key == 'return' or key == 'kpenter' then
             if gameState.mode == 'mvm' then
@@ -223,7 +226,7 @@ function love.keypressed(key)
 
             gameState.state = 'serve'
             gameState.servingPlayer = math.random(2)
-            sounds.select:play()
+            sounds.play('select')
         end
 
 
@@ -249,7 +252,7 @@ function love.keypressed(key)
         if key == 'return' or key == 'kpenter' then
             gameState.state = 'start'
             gameState.score = {0, 0}
-            sounds.select:play()
+            sounds.play('select')
         end
     end
 end
@@ -310,7 +313,7 @@ function love.draw()
     love.graphics.setCanvas() -- start drawing to screen
 
     -- Apply shader
-    if useShaders then
+    if EnableCRT then
         shader.get()(function()
             drawGameCanvas()
         end)
