@@ -8,9 +8,9 @@ local MAX_SERVE_DX = 130
 
 local BASE_SPEEDUP = 0.01
 
-local BONUS_SPEEDUP = 0.6
+local BONUS_SPEEDUP = 0.53
 local BONUS_DECAY = 0.3
-local MAX_BONUS = 3.5
+local MAX_BONUS_FACTOR = 3
 
 local MAX_DX = 325
 local MAX_SPEED = 400
@@ -111,6 +111,22 @@ function Ball:reset()
 end
 
 function Ball:render()
+    local currentSpeed = math.sqrt(self.dx^2 + self.dy^2)
+    
+    local t = (currentSpeed - MIN_SERVE_DX) / (MAX_SPEED - MIN_SERVE_DX)
+    t = math.min(math.max(t, 0), 1)
+
+    local trailSteps = math.floor(t * 8)
+    
+    -- Phosphor Ghosting
+    for i = trailSteps, 1, -1 do
+        love.graphics.setColor(1, 1, 1, (0.2 * t) / i) -- set transparency
+        
+        local offset = 0.01 * i -- trailStep offset
+        love.graphics.rectangle('fill', self.x - self.dx * offset, self.y - self.dy * offset, Ball.size, Ball.size)
+    end
+
+    love.graphics.setColor(1, 1, 1, 1)
     love.graphics.rectangle('fill', self.x, self.y, Ball.size, Ball.size)
 end
 
@@ -126,8 +142,8 @@ function Ball:_hitPaddle(paddle)
     local impactPoint = 1 - math.min(1, math.abs(intersect)) -- distance from center (0 - 1)
 
     -- Apply bonus
-    self.bonusFactor = (self.bonusFactor / 1.25) + impactPoint -- sweet spot factor
-    self.bonusFactor = math.min(self.bonusFactor, MAX_BONUS)
+    self.bonusFactor = (self.bonusFactor / 1.225) + impactPoint -- sweet spot factor
+    self.bonusFactor = math.min(self.bonusFactor, MAX_BONUS_FACTOR)
 
     -- Speed up ball
     self:_speedUp()
