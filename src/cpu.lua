@@ -39,7 +39,7 @@ local function getRandomNumber(min, max, serveRelated)
 
     if max < min then min = max end
 
-    return math.random() * (max - min) + min
+    return love.math.random() * (max - min) + min
 end
 
 local function taunt(speedIncrease)

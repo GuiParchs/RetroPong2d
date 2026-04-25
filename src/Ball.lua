@@ -31,8 +31,8 @@ function Ball:init()
 end
 
 function Ball:serve(player)
-    self.dy = math.random(-MAX_SERVE_DY, MAX_SERVE_DY)
-    self.dx = math.random(MIN_SERVE_DX, MAX_SERVE_DX)
+    self.dy = love.math.random(-MAX_SERVE_DY, MAX_SERVE_DY)
+    self.dx = love.math.random(MIN_SERVE_DX, MAX_SERVE_DX)
 
     if player == 2 then
         self.dx = -self.dx

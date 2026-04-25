@@ -84,9 +84,6 @@ function love.load()
     -- Create ball
     ball = Ball()
     ball:reset()
-
-    -- Set randomseed
-    math.randomseed(os.time())
     
     -- Load resources
     ui.loadFonts()
@@ -225,7 +222,7 @@ function love.keypressed(key)
             end
 
             gameState.state = 'serve'
-            gameState.servingPlayer = math.random(2)
+            gameState.servingPlayer = love.math.random(2)
             sounds.play('select')
         end
 
