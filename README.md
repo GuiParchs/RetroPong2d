@@ -27,3 +27,8 @@ This game was built using the following tools and libraries:
 * **[LÖVE](https://love2d.org)** -- 2D game framework (zlib license)
 * **[hump (class.lua)](https://github.com/vrld/hump)** -- Utilities for game development and OOP (MIT license)
 * **[moonshine](https://github.com/vrld/moonshine)** -- Post-processing effects (zlib license)
+
+
+## License
+MIT License
+
